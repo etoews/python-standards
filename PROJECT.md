@@ -26,10 +26,12 @@ ty is pre-1.0. If it blocks you on a legitimate typing pattern, fall back to myp
 - [7. Logging](#7-logging)
 - [8. CLI (apps only)](#8-cli-apps-only)
 - [9. Error handling](#9-error-handling)
-- [10. Dependency management](#10-dependency-management)
-- [11. Upgrading Python](#11-upgrading-python)
-- [12. Templates](#12-templates)
-- [13. Quick reference](#13-quick-reference)
+- [10. Configuration & secrets](#10-configuration--secrets)
+- [11. Pre-commit hooks](#11-pre-commit-hooks)
+- [12. Dependency management](#12-dependency-management)
+- [13. Upgrading Python](#13-upgrading-python)
+- [14. Templates](#14-templates)
+- [15. Quick reference](#15-quick-reference)
 
 ---
 
@@ -72,6 +74,7 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+.env
 ```
 
 **Commit:** `pyproject.toml`, `uv.lock`, `.python-version`. **Gitignore:** `.venv/`.
@@ -80,7 +83,7 @@ build/
 
 ## 2. `pyproject.toml`
 
-Single source of truth for metadata, build, dependencies, and tool config. See the full template in §12a.
+Single source of truth for metadata, build, dependencies, and tool config. See the full template in §14a.
 
 **Sections:**
 - `[project]` — name, version, `requires-python`, `dependencies`, authors, description, license
@@ -120,7 +123,7 @@ uv run ruff format           # format (black-compatible)
 - `S101` (assert-used): pytest uses asserts; this is correct.
 - `D100`-series (missing docstrings): tests don't need them.
 
-Config can live in `[tool.ruff]` inside `pyproject.toml` (default; §12a) or a standalone `ruff.toml` (§12b). Pick one. Do not duplicate.
+Config can live in `[tool.ruff]` inside `pyproject.toml` (default; §14a) or a standalone `ruff.toml` (§14b). Pick one. Do not duplicate.
 
 **In CI: `ruff format --check`** (fails if unformatted) and `ruff check` (no `--fix`).
 
@@ -247,7 +250,7 @@ Never `logging.getLogger()` (that's the root logger — configuring it affects e
 
 **Libraries do not configure logging.** Add `logging.getLogger("myproj").addHandler(logging.NullHandler())` in `src/myproj/__init__.py` and stop there. Let the application configure.
 
-**Applications configure once** at the entry point — see `_logging.py` template in §12d.
+**Applications configure once** at the entry point — see `_logging.py` template in §14d.
 
 **Use `%` formatting for lazy eval:**
 ```python
@@ -279,7 +282,7 @@ uv add typer
 
 **Pair with `rich`** (`uv add rich`) for tables, progress bars, and styled output to *stdout*. Keep `logging` (§7) for diagnostics to *stderr*. Different channels — don't conflate them.
 
-**Entry point** is already declared in §12a:
+**Entry point** is already declared in §14a:
 ```toml
 [project.scripts]
 myproj = "myproj.__main__:main"
@@ -287,7 +290,7 @@ myproj = "myproj.__main__:main"
 
 Then `uv run myproj --help` works, and `uv tool install .` installs it system-wide.
 
-See §12e for the `__main__.py` template.
+See §14e for the `__main__.py` template.
 
 ---
 
@@ -336,7 +339,110 @@ Never bare `except:` — always `except Exception:` at minimum (so KeyboardInter
 
 ---
 
-## 10. Dependency management
+## 10. Configuration & secrets
+
+**One typed config object, built once at the entry point, passed down explicitly.** Same discipline as logging (§7): nothing deep in the call stack reaches into `os.environ`. If a function needs a value, it takes it as a parameter.
+
+**Use `pydantic-settings`** — typed, validated, reads environment variables and `.env` from a single class:
+
+```
+uv add pydantic-settings
+```
+
+`src/myproj/config.py`:
+```python
+from pydantic import SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    """Configuration from the environment and .env.
+
+    Built once at the entry point; pass the instance (or its values)
+    down explicitly. Never re-read the environment deeper in the stack.
+    """
+
+    model_config = SettingsConfigDict(
+        env_prefix="MYPROJ_",
+        env_file=".env",
+        extra="forbid",
+    )
+
+    database_url: str                 # required — no default
+    api_key: SecretStr                # masked in logs and reprs
+    log_level: str = "INFO"
+    request_timeout_s: float = 5.0
+```
+
+Build it at the entry point, alongside `configure()` from §7:
+```python
+# in main(), src/myproj/__main__.py
+settings = Settings()   # reads env + .env, validates, fails fast
+```
+
+Rules:
+- **Required fields have no default.** Missing config fails at startup, not at first use.
+- **`extra="forbid"`** so a typo'd `MYPROJ_DATABSE_URL` is an error, not a silently ignored no-op.
+- **`SecretStr` for every secret.** Its `repr`/`str`/log output is `**********`; call `.get_secret_value()` only at the point of use. This is what makes "never log tokens" (§7) hold by default.
+- **`env_prefix`** namespaces your variables so they don't collide with unrelated environment.
+- **Precedence**, highest first: arguments passed to `Settings(...)` → environment variables → `.env` → field defaults.
+
+**Secrets and `.env`:**
+- **`.env` is never committed** — it's in `.gitignore` (§1).
+- **Commit `.env.example`** with every key present and placeholder values. It's the documented contract for what the app needs to run.
+- **In production, secrets come from the host's secret store** (env vars the platform injects), not a `.env` file. `.env` is a local-dev convenience only.
+
+---
+
+## 11. Pre-commit hooks
+
+A local gate that runs ruff and ty before each commit, so CI (§14c) rarely fails on something a hook would have caught. `pre-commit` is installed as a global tool (see MAC.md), not a project dependency.
+
+**Wire it up** (once per clone):
+```
+pre-commit install            # install the git hook
+pre-commit run --all-files    # run against the whole repo the first time
+```
+
+`.pre-commit-config.yaml`:
+```yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0          # keep in sync with the ruff version in pyproject.toml
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty
+        entry: uv run ty check
+        language: system
+        types: [python]
+        pass_filenames: false
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+```
+
+Rules:
+- **Pin every `rev:` and bump deliberately** — same stance as deps (§2) and the pinned `setup-uv` in CI (§14c). `pre-commit autoupdate` bumps them all at once; review the diff.
+- **Keep the `ruff-pre-commit` rev in sync with the `ruff` dev dependency** so the hook and CI apply identical rules. A mismatch means "passes locally, fails in CI."
+- **ty runs as a `local` system hook** (`uv run ty check`), not a mirrored repo, because it must execute in your project venv where your deps and their type information live. `pass_filenames: false` because ty checks the whole project, not just the staged files.
+- **The hook is a fast gate, not the enforcer.** It can be skipped (`git commit -n`), so CI (§14c) stays the source of truth. Run the same tools in both and don't let them drift.
+
+---
+
+## 12. Dependency management
 
 **Add deps:**
 ```
@@ -371,7 +477,7 @@ uv run --with httpx --with rich python script.py
 
 ---
 
-## 11. Upgrading Python
+## 13. Upgrading Python
 
 Bump a project to a newer Python version when the global default moves up, when you need new syntax or stdlib features, or when the current pin nears end-of-life. One project at a time, one commit.
 
@@ -398,7 +504,7 @@ Bump a project to a newer Python version when the global default moves up, when 
    uv run pytest
    ```
 
-7. **Update CI** if your workflow pins a Python version explicitly. The §12c template uses `uv python install` (no explicit version), which honours `.python-version` automatically — nothing to edit there.
+7. **Update CI** if your workflow pins a Python version explicitly. The §14c template uses `uv python install` (no explicit version), which honours `.python-version` automatically — nothing to edit there.
 
 8. **Commit as a single-purpose change.** Subject like `python: upgrade to 3.X`. Bundle `.python-version`, `pyproject.toml`, `uv.lock`, and any source/test edits ruff made. Keep unrelated work out — a Python bump should be reviewable in isolation and revertable in one click.
 
@@ -408,11 +514,11 @@ Bump a project to a newer Python version when the global default moves up, when 
 
 ---
 
-## 12. Templates
+## 14. Templates
 
 Copy-paste-ready. Rename `myproj` to your project name throughout.
 
-### 12a. `pyproject.toml` (full starter)
+### 14a. `pyproject.toml` (full starter)
 
 ```toml
 [project]
@@ -469,7 +575,7 @@ filterwarnings = ["error"]  # treat warnings as errors in tests
 include = ["src"]
 ```
 
-### 12b. Standalone `ruff.toml` (alternative to `[tool.ruff]` in pyproject.toml — pick one, not both)
+### 14b. Standalone `ruff.toml` (alternative to `[tool.ruff]` in pyproject.toml — pick one, not both)
 
 ```toml
 line-length = 100
@@ -486,7 +592,7 @@ ignore = []
 quote-style = "double"
 ```
 
-### 12c. `.github/workflows/ci.yml`
+### 14c. `.github/workflows/ci.yml`
 
 ```yaml
 name: CI
@@ -528,7 +634,7 @@ jobs:
 
 Pin `astral-sh/setup-uv` to the current major tag; bump intentionally.
 
-### 12d. `src/myproj/_logging.py`
+### 14d. `src/myproj/_logging.py`
 
 ```python
 """Logging setup. Call configure() once from the app entry point."""
@@ -583,7 +689,7 @@ def configure() -> None:
 
 Call `configure()` from `src/myproj/__main__.py` (or your CLI entry point) — never from library code.
 
-### 12e. `src/myproj/__main__.py` (Typer CLI entry point)
+### 14e. `src/myproj/__main__.py` (Typer CLI entry point)
 
 ```python
 """CLI entry point. Run with `uv run myproj` or `python -m myproj`."""
@@ -644,7 +750,7 @@ Notes:
 
 ---
 
-## 13. Quick reference
+## 15. Quick reference
 
 | Command | Purpose |
 |---|---|
