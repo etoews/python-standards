@@ -10,6 +10,7 @@ A **notes/reference directory**, not a source code repository. Actual Python pro
 
 - **MAC.md** — one-time macOS setup playbook for a Python dev machine (uv, VS Code extensions, global config, shell env var, Claude permissions). Steps are numbered and meant to be executable top-to-bottom on a fresh Mac.
 - **PROJECT.md** — per-project Python best practices once the machine is set up (src layout, `pyproject.toml`, ruff, pytest, ty, docstrings, logging, error handling) plus copy-paste templates. Referred to when bootstrapping any new Python project anywhere on disk.
+- **README.local.md** — gitignored, present only on machines that need workarounds the playbook shouldn't carry. Never commit it, and never promote its contents into MAC.md.
 
 MAC.md is the machine layer; PROJECT.md is the next layer up. PROJECT.md links back to MAC.md for install steps and does not duplicate them.
 
