@@ -4,13 +4,14 @@
 
 Fresh macOS (Apple Silicon) environment with no uv, no pyenv, and no Python tooling beyond whatever `python3` the machine already ships. That might be Apple's Command Line Tools stub at `/usr/bin/python3`, a python.org build at `/usr/local/bin/python3`, or a Homebrew build at `/opt/homebrew/bin/python3`. Which one it is does not matter, because nothing below touches it. Goal: stand up a modern uv-centric Python dev machine where every project is isolated in a virtual environment, with guardrails strong enough that accidentally polluting the system/user site-packages becomes an error.
 
-`/Users/etoews/dev/etoews/python/` is a notes/reference directory — Python projects themselves will live in other directories on disk. Conventions therefore live at **user-scope** (so they apply wherever `uv init` runs), and this file is the human-readable playbook to refer back to.
+`/Users/etoews/dev/etoews/python/` is a notes/reference directory — Python projects themselves will live in other directories on disk. Machine-wide settings (uv config, shell guardrail, Claude permissions) live at **user-scope**, so they apply wherever `uv init` runs. Language conventions do not: they belong in each project's own `CLAUDE.md`, from the template in PROJECT.md, so that non-Python sessions are not made to read Python rules.
 
 Decisions:
 - Install uv via Homebrew
 - Default Python for new projects: 3.14 (uv-managed)
-- Strong venv enforcement: `PIP_REQUIRE_VIRTUALENV=1` + uv defaults + global `CLAUDE.md`
+- Strong venv enforcement: `PIP_REQUIRE_VIRTUALENV=1` + uv defaults
 - No globally-installed uv tools — add `ruff`/`pytest`/etc. per project via `uv add --dev`
+- Nothing language-specific in `~/.claude/CLAUDE.md`, which loads into every session
 
 Assumes a network that does not intercept TLS. If a download step fails with a certificate error, the machine sits behind an inspecting proxy and needs extra trust configuration. Those notes are machine-specific, so keep them in an untracked `README.local.md` rather than here.
 
@@ -62,27 +63,7 @@ export PIP_REQUIRE_VIRTUALENV=1
 
 Makes any plain `pip install …` (any non-uv `pip` on PATH) fail with "Could not find an activated virtualenv" unless a venv is active. Paired with step 3, both code paths refuse to install globally.
 
-### 5. Create `~/.claude/CLAUDE.md` (user-scope conventions)
-
-Short Claude-facing file loaded in *every* session:
-
-```markdown
-# Python / uv conventions
-
-- All Python work uses uv. Never run bare `pip install` — it will fail anyway (PIP_REQUIRE_VIRTUALENV=1).
-- Start projects with `uv init <name>` (library) or `uv init --app <name>` (app).
-- Add deps with `uv add <pkg>` / `uv add --dev <pkg>`. Remove with `uv remove <pkg>`.
-- Run code with `uv run <cmd>` (auto-activates .venv). Scripts: `uv run python script.py`.
-- After pulling: `uv sync`.
-- Per-project Python version: `uv python pin 3.X` (writes `.python-version`). Global default is 3.14.
-- Commit: `pyproject.toml`, `uv.lock`, `.python-version`. Gitignore: `.venv/`.
-- For global CLI tools (ruff, pre-commit, etc.), use `uv tool install <pkg>` — not `pip install --user`.
-- Full playbook: `/Users/etoews/dev/etoews/python/MAC.md`.
-```
-
-If the file already exists, append this section rather than overwriting it. It may hold unrelated conventions.
-
-### 6. Extend user-scope Claude permissions
+### 5. Extend user-scope Claude permissions
 
 Edit `~/.claude/settings.json` to merge a `permissions.allow` block, preserving every existing key (`model`, `effortLevel`, `voiceEnabled`, `voice`, `enabledPlugins`, `statusLine`, and so on) and every allow entry already listed:
 
@@ -108,7 +89,7 @@ Edit `~/.claude/settings.json` to merge a `permissions.allow` block, preserving 
 
 `uv tool install` / `uv tool uninstall` are deliberately **not** auto-allowed — they mutate global state and deserve a prompt.
 
-### 7. Install VS Code extensions
+### 6. Install VS Code extensions
 
 Opinionated Python-stack extensions. Install from the terminal:
 
@@ -125,7 +106,7 @@ code --install-extension ms-toolsai.jupyter
 
 `astral-sh.ty` is Astral's preview type-checker extension — runs as a language server alongside Pylance.
 
-### 8. Configure VS Code user settings
+### 7. Configure VS Code user settings
 
 Merge into `~/Library/Application Support/Code/User/settings.json`. VS Code does not create this file until you change a setting through the UI, so on a fresh machine it will be missing; create it with these blocks wrapped in a top-level `{ … }`. A running VS Code picks the change up live, no restart needed.
 
@@ -210,15 +191,14 @@ uv tool uninstall ruff
 ## Files created / modified
 
 - **New**: `~/.config/uv/uv.toml`
-- **New**: `~/.claude/CLAUDE.md` (append instead if it already exists)
 - **New**: `/Users/etoews/dev/etoews/python/MAC.md` (this file)
 - **Edit**: `~/.zprofile` (append one export)
 - **Edit**: `~/.claude/settings.json` (add `permissions.allow`)
 - **Edit**: `~/Library/Application Support/Code/User/settings.json` (add `[python]` and `[toml]` format-on-save blocks; create the file if absent)
-- **Install**: VS Code extensions listed in step 7
-- **Unchanged**: the pre-existing system `python3`, `/Users/etoews/dev/etoews/python/.claude/settings.local.json`
+- **Install**: VS Code extensions listed in step 6
+- **Unchanged**: the pre-existing system `python3`, `~/.claude/CLAUDE.md`, `/Users/etoews/dev/etoews/python/.claude/settings.local.json`
 
-`~/.zprofile`, `~/.claude/CLAUDE.md` and `~/.claude/settings.json` may each be a symlink into a dotfiles repo. Edit the symlink target, on a branch, so the machine setup stays version-controlled. Check with `ls -la` before writing.
+`~/.zprofile` and `~/.claude/settings.json` may each be a symlink into a dotfiles repo. Edit the symlink target, on a branch, so the machine setup stays version-controlled. Check with `ls -la` before writing.
 
 ## Verification
 
@@ -236,4 +216,4 @@ Run from a fresh login shell so `~/.zprofile` is re-sourced:
    ```
    should create `demo/.venv/`, write `pyproject.toml` + `uv.lock`, print a version.
 5. `uv pip install --dry-run requests` run outside any project dir, with no venv active. Should fail with "No virtual environment found; run `uv venv` …". That is uv's built-in default, not something `uv.toml` configures, which is why step 3 needs no extra setting for this path.
-6. Start a fresh Claude session in a new directory and confirm it follows the uv conventions without prompting (proves `~/.claude/CLAUDE.md` is loading).
+6. `uv init demo && cd demo`, then confirm a fresh Claude session picks up the conventions once you drop in the `CLAUDE.md` template from PROJECT.md. Nothing loads them automatically outside a project.

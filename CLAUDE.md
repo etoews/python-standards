@@ -17,7 +17,7 @@ MAC.md is the machine layer; PROJECT.md is the next layer up. PROJECT.md links b
 ## Editing conventions
 
 - **MAC.md documents universal fresh-machine setup only.** Don't add one-off repairs for this specific machine's prior state (e.g., "uninstall extension X we installed years ago"). A reader on a clean Mac wouldn't need them. Perform one-offs in execution but leave them out of the doc.
-- **Don't duplicate `~/.claude/CLAUDE.md`.** That file already holds the short uv conventions loaded into every Claude session globally (`uv add` not `pip install`, `.venv` per project, etc.). MAC.md and PROJECT.md exist to go deeper, not to mirror it.
+- **Keep `~/.claude/CLAUDE.md` language-agnostic.** It loads into every Claude session, including non-Python ones, so nothing uv-specific goes there. The uv conventions are a per-project `CLAUDE.md`, templated in PROJECT.md section 15.
 - **For reference/playbook docs, the doc *is* the plan.** When asked to write or update MAC.md / PROJECT.md, write the final content directly to the target file — don't produce a separate meta-plan about what the doc will contain.
 
 ## Stack the docs prescribe

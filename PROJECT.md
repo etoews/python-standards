@@ -31,7 +31,8 @@ ty is pre-1.0. If it blocks you on a legitimate typing pattern, fall back to myp
 - [12. Dependency management](#12-dependency-management)
 - [13. Upgrading Python](#13-upgrading-python)
 - [14. Templates](#14-templates)
-- [15. Quick reference](#15-quick-reference)
+- [15. Project `CLAUDE.md`](#15-project-claudemd)
+- [16. Quick reference](#16-quick-reference)
 
 ---
 
@@ -750,7 +751,35 @@ Notes:
 
 ---
 
-## 15. Quick reference
+## 15. Project `CLAUDE.md`
+
+Every Python project gets its own `CLAUDE.md` at the repo root, committed. This is where the uv
+conventions live. They are deliberately **not** in `~/.claude/CLAUDE.md`, because that file loads
+into every Claude session, including ones that have nothing to do with Python.
+
+Nothing loads these automatically. Drop the file in when you create the project, right after
+`uv init`.
+
+```markdown
+# Python / uv conventions
+
+- All Python work uses uv. Never run bare `pip install`. It will fail anyway (`PIP_REQUIRE_VIRTUALENV=1`).
+- Start projects with `uv init <name>` (library) or `uv init --app <name>` (app).
+- Add deps with `uv add <pkg>` / `uv add --dev <pkg>`. Remove with `uv remove <pkg>`.
+- Run code with `uv run <cmd>` (auto-activates `.venv`). Scripts: `uv run python script.py`.
+- After pulling: `uv sync`.
+- Per-project Python version: `uv python pin 3.X` (writes `.python-version`). Global default is 3.14.
+- Commit: `pyproject.toml`, `uv.lock`, `.python-version`. Gitignore: `.venv/`.
+- For global CLI tools (ruff, pre-commit, etc.), use `uv tool install <pkg>`, not `pip install --user`.
+- Full playbook: `/Users/etoews/dev/etoews/python/PROJECT.md`.
+```
+
+Append anything project-specific below that block rather than editing it, so the shared part stays
+easy to diff against this template.
+
+---
+
+## 16. Quick reference
 
 | Command | Purpose |
 |---|---|
