@@ -2,20 +2,15 @@
 
 ## Context
 
-Fresh macOS (Apple Silicon) environment with no uv, no pyenv, and no Python tooling beyond whatever `python3` the machine already ships. That might be Apple's Command Line Tools stub at `/usr/bin/python3`, a python.org build at `/usr/local/bin/python3`, or a Homebrew build at `/opt/homebrew/bin/python3`. Which one it is does not matter, because nothing below touches it. Goal: stand up a modern uv-centric Python dev machine where every project is isolated in a virtual environment, with guardrails strong enough that accidentally polluting the system/user site-packages becomes an error.
+This is a reference directory for Python projects that will live in other directories on disk. Machine-wide settings (uv config, shell guardrail, Claude permissions) live at **user-scope**, so they apply wherever `uv init` runs. Language conventions do not: they belong in each project's own `CLAUDE.md`, from the template in PROJECT.md, so that non-Python sessions are not made to read Python rules.
 
-`/Users/etoews/dev/etoews/python/` is a notes/reference directory — Python projects themselves will live in other directories on disk. Machine-wide settings (uv config, shell guardrail, Claude permissions) live at **user-scope**, so they apply wherever `uv init` runs. Language conventions do not: they belong in each project's own `CLAUDE.md`, from the template in PROJECT.md, so that non-Python sessions are not made to read Python rules.
+Fresh macOS (Apple Silicon) environment with no uv, no pyenv, and no Python tooling beyond whatever `python3` the machine already ships. That might be Apple's Command Line Tools stub at `/usr/bin/python3`, a python.org build at `/usr/local/bin/python3`, or a Homebrew build at `/opt/homebrew/bin/python3`. Which one it is does not matter, because nothing below touches it. Goal: stand up a modern uv-centric Python dev machine where every project is isolated in a virtual environment, with guardrails strong enough that accidentally polluting the system/user site-packages becomes an error.
 
 Decisions:
 - Install uv via Homebrew
 - Default Python for new projects: 3.14 (uv-managed)
 - Strong venv enforcement: `PIP_REQUIRE_VIRTUALENV=1` + uv defaults
 - No globally-installed uv tools — add `ruff`/`pytest`/etc. per project via `uv add --dev`
-- Nothing language-specific in `~/.claude/CLAUDE.md`, which loads into every session
-
-Assumes a network that does not intercept TLS. If a download step fails with a certificate error, the machine sits behind an inspecting proxy and needs extra trust configuration. Those notes are machine-specific, so keep them in an untracked `README.local.md` rather than here.
-
-Last verified end to end on 2026-07-09: macOS 26.5.2 (arm64), uv 0.11.28, VS Code 1.127.0.
 
 ## Setup steps
 
