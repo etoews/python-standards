@@ -186,12 +186,12 @@ uv tool uninstall ruff
 ## Files created / modified
 
 - **New**: `~/.config/uv/uv.toml`
-- **New**: `/Users/etoews/dev/etoews/python/MAC.md` (this file)
+- **New**: `/Users/etoews/dev/etoews/python-standards/MAC.md` (this file)
 - **Edit**: `~/.zprofile` (append one export)
 - **Edit**: `~/.claude/settings.json` (add `permissions.allow`)
 - **Edit**: `~/Library/Application Support/Code/User/settings.json` (add `[python]` and `[toml]` format-on-save blocks; create the file if absent)
 - **Install**: VS Code extensions listed in step 6
-- **Unchanged**: the pre-existing system `python3`, `~/.claude/CLAUDE.md`, `/Users/etoews/dev/etoews/python/.claude/settings.local.json`
+- **Unchanged**: the pre-existing system `python3`, `~/.claude/CLAUDE.md`, `/Users/etoews/dev/etoews/python-standards/.claude/settings.local.json`
 
 `~/.zprofile` and `~/.claude/settings.json` may each be a symlink into a dotfiles repo. Edit the symlink target, on a branch, so the machine setup stays version-controlled. Check with `ls -la` before writing.
 

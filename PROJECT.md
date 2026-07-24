@@ -771,7 +771,7 @@ Nothing loads these automatically. Drop the file in when you create the project,
 - Per-project Python version: `uv python pin 3.X` (writes `.python-version`). Global default is 3.14.
 - Commit: `pyproject.toml`, `uv.lock`, `.python-version`. Gitignore: `.venv/`.
 - For global CLI tools (ruff, pre-commit, etc.), use `uv tool install <pkg>`, not `pip install --user`.
-- Full playbook: `/Users/etoews/dev/etoews/python/PROJECT.md`.
+- Full playbook: `/Users/etoews/dev/etoews/python-standards/PROJECT.md`.
 ```
 
 Append anything project-specific below that block rather than editing it, so the shared part stays
