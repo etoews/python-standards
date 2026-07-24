@@ -2,9 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## What this directory is
+## What this repo is
 
-A **notes/reference directory**, not a source code repository. Actual Python projects live in other directories on disk. There is nothing to build, test, or lint here — just two markdown files maintained by hand.
+A **standards/reference repo**, not a source code repository. Actual Python projects live in other directories on disk and are held to the standards written here. There is nothing to build, test, or lint here — just markdown files maintained by hand.
 
 ## Files
 

@@ -1,6 +1,6 @@
 # Python Project Best Practices
 
-Opinionated, single-path conventions for Python projects on this machine. Prescriptive — fork any section if your project genuinely needs otherwise. Machine-level setup (uv install, global config, venv enforcement) lives in **MAC.md**; this file is the next layer up: how to structure and run an individual project.
+Opinionated, single-path standards for Python projects on this machine. Prescriptive — fork any section if your project genuinely needs otherwise. Machine-level setup (uv install, global config, venv enforcement) lives in **MAC.md**; this file is the next layer up: how to structure and run an individual project.
 
 ## Stack
 
