@@ -4,33 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A **standards/reference repo**, not a source code repository. Actual Python projects live in other directories on disk and are held to the standards written here. There is nothing to build, test, or lint here — just markdown files maintained by hand.
+A **standards/reference repo**, not a source code repository. Actual Python projects live in their own repositories and follow the standards written here. There is nothing to build, test, or lint here, just markdown files maintained by hand.
 
 ## Files
 
-- **MAC.md** — one-time macOS setup playbook for a Python dev machine (uv, VS Code extensions, global config, shell env var, Claude permissions). Steps are numbered and meant to be executable top-to-bottom on a fresh Mac.
-- **PROJECT.md** — per-project Python best practices once the machine is set up (src layout, `pyproject.toml`, ruff, pytest, ty, docstrings, logging, error handling) plus copy-paste templates. Referred to when bootstrapping any new Python project anywhere on disk.
-- **README.local.md** — gitignored, present only on machines that need workarounds the playbook shouldn't carry. Never commit it, and never promote its contents into MAC.md.
+- **standards/manifest.md**: the entry point a project imports. It pulls in the topic standards files below, so a project subscribes to all of them through this one import. Add a standard by writing its file and importing it here.
+- **standards/uv.md**: the always-on uv and environments rules. Single source of truth for the uv conventions; nothing else in the repo restates them.
+- **README.md**: how the standards are used in a project and how a project adopts a new tagged release.
+- **PROJECT.md**: the full per-project playbook (src layout, `pyproject.toml`, ruff, pytest, ty, docstrings, logging, error handling) plus copy-paste templates. Read on demand when bootstrapping or configuring a project.
+- **MAC.md**: one-time macOS setup playbook for a Python dev machine (uv, VS Code extensions, global config, shell env var, Claude permissions). Steps are numbered and executable top-to-bottom on a fresh Mac.
+- **README.local.md**: gitignored, present only on machines that need workarounds the playbook shouldn't carry. Never commit it, and never promote its contents into MAC.md.
 
-MAC.md is the machine layer; PROJECT.md is the next layer up. PROJECT.md links back to MAC.md for install steps and does not duplicate them.
+manifest.md is the entry point that imports the always-on standards files (uv.md, and more as they are added), PROJECT.md is the full playbook, MAC.md is the machine layer. Each project imports manifest.md and reads PROJECT.md on demand.
 
 ## Editing conventions
 
 - **MAC.md documents universal fresh-machine setup only.** Don't add one-off repairs for this specific machine's prior state (e.g., "uninstall extension X we installed years ago"). A reader on a clean Mac wouldn't need them. Perform one-offs in execution but leave them out of the doc.
-- **Keep `~/.claude/CLAUDE.md` language-agnostic.** It loads into every Claude session, including non-Python ones, so nothing uv-specific goes there. The uv conventions are a per-project `CLAUDE.md`, templated in PROJECT.md section 15.
+- **Keep `~/.claude/CLAUDE.md` language-agnostic.** It loads into every Claude session, including non-Python ones, so nothing uv-specific goes there. The uv conventions live in `standards/uv.md`, imported through `standards/manifest.md` into each project's own `CLAUDE.md`. See README.md for how projects consume the standards.
 - **For reference/playbook docs, the doc *is* the plan.** When asked to write or update MAC.md / PROJECT.md, write the final content directly to the target file — don't produce a separate meta-plan about what the doc will contain.
 
 ## Stack the docs prescribe
 
 uv (deps/envs) · ruff (lint+format) · pytest (tests) · ty (type check, with mypy as documented fallback) · stdlib logging. Python 3.14 is the global default (uv-managed). `src/` layout, `pyproject.toml` as single source of truth, `uv.lock` committed.
-
-# Python / uv conventions
-
-- All Python work uses uv. Never run bare `pip install` — it will fail anyway (`PIP_REQUIRE_VIRTUALENV=1`).
-- Start projects with `uv init <name>` (library) or `uv init --app <name>` (app).
-- Add deps with `uv add <pkg>` / `uv add --dev <pkg>`. Remove with `uv remove <pkg>`.
-- Run code with `uv run <cmd>` (auto-activates `.venv`). Scripts: `uv run python script.py`.
-- After pulling: `uv sync`.
-- Per-project Python version: `uv python pin 3.X` (writes `.python-version`). Global default is 3.14.
-- Commit: `pyproject.toml`, `uv.lock`, `.python-version`. Gitignore: `.venv/`.
-- For global CLI tools (ruff, pre-commit, etc.), use `uv tool install <pkg>` — not `pip install --user`.

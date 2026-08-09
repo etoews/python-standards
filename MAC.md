@@ -2,7 +2,7 @@
 
 ## Context
 
-This is the standards repo for Python projects that will live in other directories on disk. Machine-wide settings (uv config, shell guardrail, Claude permissions) live at **user-scope**, so they apply wherever `uv init` runs. Language conventions do not: they belong in each project's own `CLAUDE.md`, from the template in PROJECT.md, so that non-Python sessions are not made to read Python rules.
+This is the standards repo that Python projects follow. Machine-wide settings (uv config, shell guardrail, Claude permissions) live at **user-scope**, so they apply wherever `uv init` runs. Language conventions do not: they belong in each project's own `CLAUDE.md`, which imports `standards/manifest.md`, so that non-Python sessions are not made to read Python rules.
 
 Fresh macOS (Apple Silicon) environment with no uv, no pyenv, and no Python tooling beyond whatever `python3` the machine already ships. That might be Apple's Command Line Tools stub at `/usr/bin/python3`, a python.org build at `/usr/local/bin/python3`, or a Homebrew build at `/opt/homebrew/bin/python3`. Which one it is does not matter, because nothing below touches it. Goal: stand up a modern uv-centric Python dev machine where every project is isolated in a virtual environment, with guardrails strong enough that accidentally polluting the system/user site-packages becomes an error.
 
