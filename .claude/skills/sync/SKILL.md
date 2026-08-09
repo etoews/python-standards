@@ -21,7 +21,7 @@ Run the read-only audit first and again at the end:
 ```
 
 It reports git state, this Mac's conformance to MAC.md, doc integrity (internal
-links and TOC anchors), and warnings. It never mutates anything. Its
+links and TOC anchors), manifest import integrity, and warnings. It never mutates anything. Its
 expectations are parsed out of MAC.md, so the doc stays the source of truth and
 the audit follows it automatically. When exercising the skill against a sandbox
 copy, set `PYSTD_DIR` and `PYSTD_HOME`; note that `PYSTD_HOME` only redirects

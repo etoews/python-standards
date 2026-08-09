@@ -187,6 +187,78 @@ if not problems:
 PYEOF
 
 echo ""
+echo "== IMPORTS =="
+python3 - "$DIR" <<'PYEOF'
+import os, re, sys
+
+# Validate the manifest @import graph the way Claude Code resolves it: every
+# @import is relative to the file that contains it, with a four-hop ceiling. A
+# consuming project spends one hop importing the manifest, so the manifest's own
+# subtree may go three levels deep at most. This catches a renamed or missing
+# topic file (a dangling @import) before a release is tagged.
+root = sys.argv[1]
+bundle = os.path.join(root, "standards")
+entry = os.path.join(bundle, "manifest.md")
+MAX_DEPTH = 3
+
+FENCE = re.compile(r'```.*?```', re.S)
+IMPORT = re.compile(r'(?m)(?:^|(?<=\s))@([\w./-]+\.\w+)')
+
+def imports_in(path):
+    try:
+        text = FENCE.sub('', open(path).read())
+    except OSError:
+        return []
+    out, seen = [], set()
+    for m in IMPORT.finditer(text):
+        tok = m.group(1)
+        if tok not in seen:
+            seen.add(tok)
+            out.append(tok)
+    return out
+
+def rel(p):
+    return os.path.relpath(p, root)
+
+problems = 0
+reached = {entry}
+
+if not os.path.isfile(entry):
+    print("BROKEN: standards/manifest.md missing (the import entry point)")
+    problems += 1
+else:
+    stack = [(entry, 0, (entry,))]
+    checked = 0
+    deepest = 0
+    while stack:
+        path, depth, chain = stack.pop()
+        deepest = max(deepest, depth)
+        for imp in imports_in(path):
+            target = os.path.normpath(os.path.join(os.path.dirname(path), imp))
+            checked += 1
+            if not os.path.isfile(target):
+                print(f"BROKEN: {rel(path)} imports @{imp}, no such file")
+                problems += 1
+            elif target in chain:
+                print(f"CYCLE: {rel(path)} imports @{imp}, already in the import chain")
+                problems += 1
+            elif depth + 1 > MAX_DEPTH:
+                print(f"TOO DEEP: {rel(target)} at depth {depth + 1}, over the {MAX_DEPTH}-hop budget")
+                problems += 1
+            else:
+                reached.add(target)
+                stack.append((target, depth + 1, chain + (target,)))
+    if problems == 0:
+        print(f"OK: manifest import chain resolves ({checked} import(s), max depth {deepest})")
+
+if os.path.isdir(bundle):
+    for f in sorted(os.listdir(bundle)):
+        p = os.path.join(bundle, f)
+        if f.endswith(".md") and os.path.isfile(p) and p not in reached:
+            print(f"note: standards/{f} is present but not imported by the manifest")
+PYEOF
+
+echo ""
 echo "== NOTES =="
 localnotes="$DIR/README.local.md"
 if [ -f "$localnotes" ]; then
