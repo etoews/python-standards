@@ -15,6 +15,9 @@ source of truth, `uv.lock` committed.
   import.
 - **[standards/uv.md](standards/uv.md)**: the always-on uv and environments rules. Short and
   imperative, the single source of truth for the uv conventions.
+- **[standards/mac-launch-on-startup.md](standards/mac-launch-on-startup.md)**: opt-in, not imported
+  by the manifest. How to run a project at login on macOS as one always-on instance that is also the
+  development instance. Followed only when the user explicitly asks for it.
 - **[PROJECT.md](PROJECT.md)**: the full playbook: project structure, `pyproject.toml`, ruff,
   pytest, ty, docstrings, logging, CLI, error handling, config and secrets, pre-commit, upgrading
   Python, and copy-paste templates. Read the relevant section when the task calls for it.

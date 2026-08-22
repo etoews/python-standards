@@ -8,8 +8,9 @@ A **standards/reference repo**, not a source code repository. Actual Python proj
 
 ## Files
 
-- **standards/manifest.md**: the entry point a project imports. It pulls in the topic standards files below, so a project subscribes to all of them through this one import. Add a standard by writing its file and importing it here.
+- **standards/manifest.md**: the entry point a project imports. It pulls in the always-on topic standards files, so a project subscribes to all of them through this one import. It also lists the opt-in standards, which it names but does not import. Add an always-on standard by writing its file and importing it here; add an opt-in standard by writing its file and listing it under "Opt-in standards" without an import.
 - **standards/uv.md**: the always-on uv and environments rules. Single source of truth for the uv conventions; nothing else in the repo restates them.
+- **standards/mac-launch-on-startup.md**: opt-in, not imported by the manifest. How to run a project at login on macOS as one always-on instance that is also the development instance. Followed only when the user explicitly asks for it.
 - **README.md**: how the standards are used in a project and how a project adopts a new tagged release.
 - **PROJECT.md**: the full per-project playbook (src layout, `pyproject.toml`, ruff, pytest, ty, docstrings, logging, error handling) plus copy-paste templates. Read on demand when bootstrapping or configuring a project.
 - **MAC.md**: one-time macOS setup playbook for a Python dev machine (uv, VS Code extensions, global config, shell env var, Claude permissions). Steps are numbered and executable top-to-bottom on a fresh Mac.
