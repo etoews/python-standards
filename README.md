@@ -8,25 +8,48 @@ Stack: uv (deps and envs), ruff (lint and format), pytest (tests), ty (type chec
 documented fallback), stdlib logging. Python 3.14, `src/` layout, `pyproject.toml` as the single
 source of truth, `uv.lock` committed.
 
-## What's in here
+## The Standards
+
+### The manifest
 
 - **[standards/manifest.md](standards/manifest.md)**: the entry point a project imports. It pulls in
-  the always-on standards files below, so a project subscribes to all of them through this one
-  import, and names the read-on-demand and opt-in files without importing them.
-- **[standards/uv.md](standards/uv.md)** and the other always-on topic files
-  ([structure](standards/structure.md), [ruff](standards/ruff.md), [pytest](standards/pytest.md),
-  [ty](standards/ty.md), [docstrings](standards/docstrings.md), [logging](standards/logging.md),
-  [error-handling](standards/error-handling.md), [configuration](standards/configuration.md)): the
-  day-to-day conventions the manifest imports. uv.md is short and imperative, the single source of
-  truth for the uv conventions.
-- **standards/ read-on-demand files** ([pyproject](standards/pyproject.md),
-  [dependencies](standards/dependencies.md), [upgrading-python](standards/upgrading-python.md),
-  [pre-commit](standards/pre-commit.md), [cli](standards/cli.md), [templates](standards/templates.md),
-  [quick-reference](standards/quick-reference.md)): named by the manifest but not imported. Open the
-  matching file when the task calls for it.
-- **[standards/mac-launch-on-startup.md](standards/mac-launch-on-startup.md)**: opt-in, not imported
-  by the manifest. How to run a project at login on macOS as one always-on instance that is also the
+  the always-on standards files, so a project subscribes to all of them through this one import, and
+  names the read-on-demand and opt-in files without importing them.
+
+### Always-on
+
+Imported by the manifest, so they load in every project session — the conventions an agent follows
+on every task. uv.md is short and imperative, the single source of truth for the uv conventions.
+
+- [uv](standards/uv.md) — uv and environments
+- [structure](standards/structure.md) — the `src/` layout
+- [ruff](standards/ruff.md) — lint and format
+- [pytest](standards/pytest.md) — tests
+- [ty](standards/ty.md) — type check
+- [docstrings](standards/docstrings.md) — Google-style docstrings
+- [logging](standards/logging.md) — stdlib logging
+- [error-handling](standards/error-handling.md) — exception hierarchy and boundaries
+- [configuration](standards/configuration.md) — typed config and secrets
+
+### Read on demand
+
+Named by the manifest but not imported. Open the matching file when the task calls for it:
+
+- **Building a project**: [pyproject](standards/pyproject.md),
+  [dependencies](standards/dependencies.md), [upgrading-python](standards/upgrading-python.md).
+- **Tooling and templates**: [pre-commit](standards/pre-commit.md),
+  [templates](standards/templates.md) (ready-to-copy `pyproject.toml`, CI workflow, logging setup,
+  CLI entry point), [quick-reference](standards/quick-reference.md).
+- **CLI apps**: [cli](standards/cli.md).
+
+### Opt-in
+
+- **[standards/mac-launch-on-startup.md](standards/mac-launch-on-startup.md)**: not imported by the
+  manifest. How to run a project at login on macOS as one always-on instance that is also the
   development instance. Followed only when the user explicitly asks for it.
+
+### MAC
+
 - **[MAC.md](MAC.md)**: one-time setup for a Python dev machine: installing uv, global config, the
   virtual-env guardrail, and VS Code extensions. Run once per machine, independent of any project.
 
@@ -48,18 +71,6 @@ The import means the standards are never pasted into the project, so there is on
 and no copy to drift. The manifest pulls in the always-on standards files, and names the
 read-on-demand files that a task opens when it needs them. Commit the submodule and the `CLAUDE.md`
 change together.
-
-## Read on demand
-
-The always-on standards cover day-to-day coding. A few topics are named by the manifest but not
-imported; open the matching file in `standards/` before acting:
-
-- **Building a project**: `pyproject.md`, `dependencies.md`, `upgrading-python.md`.
-- **Tooling and templates**: `pre-commit.md`, `templates.md` (ready-to-copy `pyproject.toml`, CI
-  workflow, logging setup, CLI entry point), `quick-reference.md`.
-- **CLI apps**: `cli.md`.
-
-One-time machine setup is separate, in MAC.md.
 
 ## Versioning and updates
 
