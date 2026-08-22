@@ -159,7 +159,7 @@ python3 - "$DIR" <<'PYEOF'
 import os, re, sys
 
 root = sys.argv[1]
-docs = [f for f in ("README.md", "MAC.md", "PROJECT.md", "CLAUDE.md")
+docs = [f for f in ("README.md", "MAC.md", "CLAUDE.md")
         if os.path.isfile(os.path.join(root, f))]
 
 def anchor(heading):

@@ -211,4 +211,4 @@ Run from a fresh login shell so `~/.zprofile` is re-sourced:
    ```
    should create `demo/.venv/`, write `pyproject.toml` + `uv.lock`, print a version.
 5. `uv pip install --dry-run requests` run outside any project dir, with no venv active. Should fail with "No virtual environment found; run `uv venv` …". That is uv's built-in default, not something `uv.toml` configures, which is why step 3 needs no extra setting for this path.
-6. `uv init demo && cd demo`, then confirm a fresh Claude session picks up the conventions once you drop in the `CLAUDE.md` template from PROJECT.md. Nothing loads them automatically outside a project.
+6. `uv init demo && cd demo`, then confirm a fresh Claude session picks up the conventions once you drop in the `CLAUDE.md` template from README.md. Nothing loads them automatically outside a project.

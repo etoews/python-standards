@@ -12,15 +12,21 @@ source of truth, `uv.lock` committed.
 
 - **[standards/manifest.md](standards/manifest.md)**: the entry point a project imports. It pulls in
   the always-on standards files below, so a project subscribes to all of them through this one
-  import.
-- **[standards/uv.md](standards/uv.md)**: the always-on uv and environments rules. Short and
-  imperative, the single source of truth for the uv conventions.
+  import, and names the read-on-demand and opt-in files without importing them.
+- **[standards/uv.md](standards/uv.md)** and the other always-on topic files
+  ([structure](standards/structure.md), [ruff](standards/ruff.md), [pytest](standards/pytest.md),
+  [ty](standards/ty.md), [docstrings](standards/docstrings.md), [logging](standards/logging.md),
+  [error-handling](standards/error-handling.md), [configuration](standards/configuration.md)): the
+  day-to-day conventions the manifest imports. uv.md is short and imperative, the single source of
+  truth for the uv conventions.
+- **standards/ read-on-demand files** ([pyproject](standards/pyproject.md),
+  [dependencies](standards/dependencies.md), [upgrading-python](standards/upgrading-python.md),
+  [pre-commit](standards/pre-commit.md), [cli](standards/cli.md), [templates](standards/templates.md),
+  [quick-reference](standards/quick-reference.md)): named by the manifest but not imported. Open the
+  matching file when the task calls for it.
 - **[standards/mac-launch-on-startup.md](standards/mac-launch-on-startup.md)**: opt-in, not imported
   by the manifest. How to run a project at login on macOS as one always-on instance that is also the
   development instance. Followed only when the user explicitly asks for it.
-- **[PROJECT.md](PROJECT.md)**: the full playbook: project structure, `pyproject.toml`, ruff,
-  pytest, ty, docstrings, logging, CLI, error handling, config and secrets, pre-commit, upgrading
-  Python, and copy-paste templates. Read the relevant section when the task calls for it.
 - **[MAC.md](MAC.md)**: one-time setup for a Python dev machine: installing uv, global config, the
   virtual-env guardrail, and VS Code extensions. Run once per machine, independent of any project.
 
@@ -39,19 +45,19 @@ Then the project's own `CLAUDE.md` imports the manifest and adds nothing but pro
     # project-specific guidance below
 
 The import means the standards are never pasted into the project, so there is one source of truth
-and no copy to drift. The manifest pulls in the always-on standards files (uv and environments
-today), and PROJECT.md holds everything read on demand. Commit the submodule and the `CLAUDE.md`
+and no copy to drift. The manifest pulls in the always-on standards files, and names the
+read-on-demand files that a task opens when it needs them. Commit the submodule and the `CLAUDE.md`
 change together.
 
-## The full playbook
+## Read on demand
 
-The always-on standards are only the essentials. For anything past day-to-day work, open the
-matching part of PROJECT.md before acting:
+The always-on standards cover day-to-day coding. A few topics are named by the manifest but not
+imported; open the matching file in `standards/` before acting:
 
-- **Building a project**: structure, `pyproject.toml`, dependency management, upgrading Python.
-- **Quality tooling**: ruff, pytest, ty, pre-commit, docstrings.
-- **Writing the code**: logging, error handling, configuration and secrets, CLI apps.
-- **Templates**: ready-to-copy `pyproject.toml`, CI workflow, logging setup, and CLI entry point.
+- **Building a project**: `pyproject.md`, `dependencies.md`, `upgrading-python.md`.
+- **Tooling and templates**: `pre-commit.md`, `templates.md` (ready-to-copy `pyproject.toml`, CI
+  workflow, logging setup, CLI entry point), `quick-reference.md`.
+- **CLI apps**: `cli.md`.
 
 One-time machine setup is separate, in MAC.md.
 

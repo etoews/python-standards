@@ -1,12 +1,13 @@
 ---
 name: sync
-description: Sync this python-standards repo between machines and verify this Mac still matches what MAC.md prescribes. Use whenever the user says "sync", asks to push or pull the standards, says they edited the docs on the other machine, reports that a documented setup step no longer holds (uv missing, wrong default Python, the pip guardrail not firing, a VS Code extension gone), or has just changed MAC.md or PROJECT.md in a way the other machine should pick up, even if they never say the word "sync".
+description: Sync this python-standards repo between machines and verify this Mac still matches what MAC.md prescribes. Use whenever the user says "sync", asks to push or pull the standards, says they edited the docs on the other machine, reports that a documented setup step no longer holds (uv missing, wrong default Python, the pip guardrail not firing, a VS Code extension gone), or has just changed MAC.md or a standards file in a way the other machine should pick up, even if they never say the word "sync".
 ---
 
 # Sync
 
 This repo lives at `$HOME/dev/etoews/python-standards` and holds only markdown:
-MAC.md (machine layer), PROJECT.md (per-project layer), README.md, CLAUDE.md.
+MAC.md (machine layer), the standards/ topic files behind manifest.md (per-project
+layer), README.md, CLAUDE.md.
 Git carries it between machines. "Sync" means: pull, reconcile drift, ff-merge
 the working branch, push, verify. Always do all five, in that order, even if
 the user only asked for one direction. Half a sync is how the machines quietly
@@ -104,9 +105,10 @@ put it in `README.local.md`.
 ## After syncing, tell the user what still needs a human
 
 - A changed `~/.zprofile` does not affect open shells: `exec zsh`.
-- Pulled PROJECT.md changes do not reach existing projects. Their per-project
-  `CLAUDE.md` was copied from the template at `uv init` time and is now a fork;
-  say which projects likely want the update rather than editing them here.
+- Pulled standards changes do not reach existing projects until they bump the
+  vendored submodule to the new tag; the per-project `CLAUDE.md` only imports the
+  manifest, so say which projects likely want the update rather than editing them
+  here.
 - The other machine only gets doc changes on its own next sync.
 
 ## Report format
