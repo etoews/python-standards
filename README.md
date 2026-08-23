@@ -8,6 +8,17 @@ Stack: uv (deps and envs), ruff (lint and format), pytest (tests), ty (type chec
 documented fallback), stdlib logging. Python 3.14, `src/` layout, `pyproject.toml` as the single
 source of truth, `uv.lock` committed.
 
+## Contents
+
+- [The Standards](#the-standards)
+  - [The manifest](#the-manifest)
+  - [Always-on](#always-on)
+  - [Read on demand](#read-on-demand)
+  - [Opt-in](#opt-in)
+  - [MAC](#mac)
+- [Use the standards in a project](#use-the-standards-in-a-project)
+- [Versioning and updates](#versioning-and-updates)
+
 ## The Standards
 
 ### The manifest
