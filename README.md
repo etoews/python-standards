@@ -18,6 +18,7 @@ source of truth, `uv.lock` committed.
   - [MAC](#mac)
 - [Use the standards in a project](#use-the-standards-in-a-project)
 - [Versioning and updates](#versioning-and-updates)
+- [Releases](#releases)
 
 ## The Standards
 
@@ -88,10 +89,6 @@ change together.
 The standards are released as git tags, and each project pins the submodule to one tag, so a project
 adopts changes deliberately rather than having them shift underneath it.
 
-Release a new version from this repo:
-
-    git tag 1.2.0 && git push origin main --tags
-
 Adopt that version in a project (this example moves it from 1.1.0 to 1.2.0):
 
     git -C standards/python fetch --tags
@@ -100,3 +97,17 @@ Adopt that version in a project (this example moves it from 1.1.0 to 1.2.0):
 
 Then commit the updated submodule pointer. Nothing in the project's `CLAUDE.md` changes, because it
 only imports the manifest.
+
+## Releases
+
+Each release is an annotated git tag, versioned with [Semantic Versioning](https://semver.org):
+**major** when adopting it needs more than a submodule bump (a moved import, a removed standard),
+**minor** when standards are added or changed compatibly, **patch** for fixes and wording. The tag
+message summarises what changed.
+
+Cut a release from `main`:
+
+    git tag -a 1.4.0 -m "one-line summary of what changed"
+    git push origin 1.4.0
+
+Projects adopt it deliberately — see [Versioning and updates](#versioning-and-updates).
