@@ -19,6 +19,7 @@ source of truth, `uv.lock` committed.
 - [Use the standards in a project](#use-the-standards-in-a-project)
 - [Versioning and updates](#versioning-and-updates)
 - [Releases](#releases)
+- [Skills](#skills)
 
 ## The Standards
 
@@ -111,3 +112,20 @@ Cut a release from `main`:
     git push origin 1.4.0
 
 Projects adopt it deliberately — see [Versioning and updates](#versioning-and-updates).
+
+## Skills
+
+The repo ships two [Claude Code skills](https://docs.claude.com/en/docs/claude-code/skills) under
+`.claude/skills/`. Each is a folder with a `SKILL.md` and its scripts. Claude loads a skill when the
+task matches its description, or you invoke it by name with `/<name>`.
+
+- **[sync](.claude/skills/sync/SKILL.md)**: keep this repo in step across machines and confirm this
+  Mac still matches [MAC.md](MAC.md). It pulls, reconciles drift, fast-forward-merges the working
+  branch, pushes, and re-audits. A read-only audit script reports git state, this Mac's conformance
+  to MAC.md, and doc and manifest integrity, without changing anything. Runs inside this repo.
+- **[test-manifest-import-chain-from-consumer](.claude/skills/test-manifest-import-chain-from-consumer/SKILL.md)**:
+  prove that a fresh Claude Code session in a project loads the standards through the chained import
+  (`CLAUDE.md` → `manifest.md` → `uv.md`). It plants a random sentinel in the deepest file, probes
+  with a headless `claude` session, checks the answer came from the loaded import rather than a file
+  read, then reverts. Run it from a **consumer** project after adding the submodule or bumping it to
+  a new tag.
