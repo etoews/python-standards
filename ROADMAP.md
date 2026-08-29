@@ -50,12 +50,17 @@ code. A step the agent must remember is a step it sometimes skips, and
 Claude Code hooks, so the harness runs them after every edit and the agent does
 not have to remember.
 
-- A `PostToolUse` hook on `Edit` and `Write` runs `uv run ruff check --fix` and
-  `uv run ruff format` on each edited `.py` file. Findings that autofix cannot
-  clear go back to the agent, so it corrects them in the same turn.
-- A `Stop` hook runs `uv run ty check` and `uv run pytest` over the project. A
-  failure blocks the end of the turn and returns the output to the agent, so no
-  turn ends with a type error or a failed test.
+The hook joins `pre-commit` and CI as a third layer. All three run the same
+tools with the same settings, each through `uv run` in the project venv, so a
+finding is the same at each layer.
+
+| Layer | What runs | What it is for | When |
+|-------|-----------|----------------|------|
+| Hook, `PostToolUse` | `ruff check --fix` and `ruff format` on the edited file | Feedback to the agent in the session. Findings that autofix cannot clear go back to the agent, so it corrects them in the same turn. | After each `Edit` or `Write` of a `.py` file |
+| Hook, `Stop` | `ty check` and `pytest` over the project | A gate on the turn. A failure blocks the end of the turn and returns the output to the agent, so no turn ends with a type error or a failed test. | Before the agent ends its turn |
+| `pre-commit` | `ruff check --fix` and `ruff format` on the staged files, `ty check` over the project, and the `pre-commit-hooks` file checks | A fast gate on a commit, by a person or by the agent, so CI rarely fails on something the gate would have caught. `git commit -n` skips it, so it is not the enforcer. | Before each commit |
+| CI | `uv sync --locked`, then `ruff check`, `ruff format --check`, `ty check`, and `pytest --cov` over the project | The enforcer and the source of truth. A change merges only when CI passes. | On each push to `main` and each pull request |
+
 - A check belongs in a hook when it is deterministic, idempotent, and fast
   enough to run every time. Ruff, ty, and pytest qualify. A step that needs
   judgement, such as a review, a doc revision, or a commit, stays with the
@@ -63,9 +68,6 @@ not have to remember.
 - The hook scripts live in this repo, under `hooks/`. A project's
   `.claude/settings.json` points at `standards/python/hooks/`, so every project
   runs the same script and a tag bump updates them all at once.
-- The hook, `pre-commit`, and CI run the same tools with the same settings. The
-  hook serves the agent in the session, `pre-commit` serves a human commit, and
-  CI stays the source of truth. Keep the three in step.
 
 **Standards to revise:** `ruff.md` and `ty.md` (the hook runs the commands; the
 agent runs them by hand only outside a session), `pre-commit.md` (the
